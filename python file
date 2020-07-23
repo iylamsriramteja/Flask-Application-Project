@@ -1,0 +1,43 @@
+from flask import Flask, render_template, request
+
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    return render_template("myweb.html")
+
+
+@app.route('/', methods=['post'])
+def getvalue():
+    Name = request.form['Name']
+    not_out = request.form['NO']
+    avg = request.form['avg']
+    sr = request.form['sr']
+    not_out = int(not_out)
+    avg = float(avg)
+    sr = float(sr)
+    import pandas as pd
+    bat = pd.read_csv('C:/Users/Lenovo/Desktop/minor project/bat_data.csv')
+    from sklearn.model_selection import cross_val_score
+    from sklearn.ensemble import AdaBoostClassifier
+
+    train_data = bat
+    # train_data = train_data[['Inns','NO','RunsDescending','Ave','SR','Selected']]
+
+    train_x = train_data[['NO','Ave','SR']]
+    train_y = train_data[['Selected']]
+
+    clf = AdaBoostClassifier(n_estimators=100)
+    clf.fit(train_x, train_y)
+    sel = clf.predict([[not_out,avg,sr]])
+    if sel== ['Y']:
+        pr =  Name,"The Batsmen is Selected"
+    else:
+        pr =  Name,"The Batsmen is not Selected"
+
+    return render_template("myweb.html", pre=pr)
+
+
+if __name__ == '__main__':
+    app.run()
